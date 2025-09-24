@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Complaint - Road Issue Reporting</title>
+    <link rel="stylesheet" href="/css/trackk.css">
+</head>
+<body>
+    <!-- Main Content -->
+     <%- include("navbar") %>
+     <div class="header">
+        <div class="header-content">
+            <a href="/" class="logo" onclick="showSection('home')">
+                <div class="logo-icon">C</div>
+                <span>CITYZEN</span>
+            </a>
+        </div>
+    </div>
+
+    
+    <main class="container">
+        <!-- Track Section -->
+        <div class="track-section">
+            <div class="track-header">
+                <h1>Track Your Complaint</h1>
+                <p>Enter your complaint ID to view the current status and progress</p>
+            </div>
+            <form id="complaintForm">
+            <div class="track-form">
+                <input type="text" class="track-input" id="complaintId" name="complaintId" required placeholder="Enter Complaint ID (e.g., RDC-2025-001247)" maxlength="15">
+                <button class="track-btn" id="track-sts" type="button">Track Status</button>
+            </div>
+            </form>
+        </div>
+
+        <!-- Status Display -->
+         <% if(locals.complaintstatus){ %>
+        <div class="status-display" id="statusDisplay">
+            <!-- Complaint Info -->
+            <div class="complaint-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Complaint ID:</span>
+                        <span class="info-value complaint-id-value" id="displayComplaintId"><%= deptt %>-2025-0<%= complaintstatus.id %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Category:</span>
+                        <span class="info-value" id="displayCategory">Unidentified</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Submitted On:</span>
+                        <span class="info-value" id="displaySubmissionDate"><%= complaintstatus.submissionDate %></span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Current Status:</span>
+                        <span class="info-value">
+                            <span class="status-badge" id="currentStatusBadge">Rejected</span>
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Tracker -->
+            <div class="progress-tracker">
+                <div class="progress-header">
+                    <h2>Complaint Progress</h2>
+                </div>
+
+                <div class="progress-steps">
+                    <div class="progress-line">
+                        <div class="progress-line-fill" id="progressLineFill"  style="background-color: black;"></div>
+                    </div>
+
+                    <div class="step completed" id="step1">
+                        <div class="step-circle">✓</div>
+                        <div class="step-info">
+                            <div class="step-title">Pending</div>
+                            <div class="step-date" id="pendingDate"><%= complaintstatus.submissionDate %></div>
+                        </div>
+                    </div>
+
+                    <div class="step" id="step2">
+                        <div class="step-circle">2</div>
+                        <div class="step-info">
+                            <div class="step-title">Rejected</div>
+                            <div class="step-date" id="acknowledgedDate">Sep 24, 2025</div>
+                        </div>
+                    </div>
+
+                    <div class="step" id="step3">
+                        <div class="step-circle">3</div>
+                        <div class="step-info">
+                            <div class="step-title">In Progress</div>
+                            <div class="step-date" id="progressDate">Sep 25, 2025</div>
+                        </div>
+                    </div>
+
+                    <div class="step" id="step4">
+                        <div class="step-circle">4</div>
+                        <div class="step-info">
+                            <div class="step-title">Resolved</div>
+                            <div class="step-date" id="resolvedDate">Sep 25, 2025</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Section -->
+            <div class="feedback-section">
+                <div class="feedback-header">
+                    <h3>Provide Feedback</h3>
+                    <p>Help us improve our service by sharing your experience</p>
+                </div>
+
+                <form class="feedback-form" onsubmit="submitFeedback(event)">
+                    <div class="rating-group">
+                        <label class="rating-label">Rate our service:</label>
+                        <div class="star-rating" id="starRating">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="rating-label" for="feedbackText">Your feedback:</label>
+                        <textarea 
+                            id="feedbackText" 
+                            class="feedback-textarea" 
+                            placeholder="Please share your experience, suggestions, or any concerns regarding the handling of your complaint..."
+                            rows="4"
+                        ></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-feedback-btn">Submit Feedback</button>
+                </form>
+            </div>
+        </div>
+        <% } %>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 CITIZEN - Civic Issue Reporting System | Making Cities Better Together</p>
+    </footer>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        let currentRating = 0;
+
+        document.getElementById("track-sts").addEventListener("click", function () {
+            const complaintId = document.getElementById("complaintId").value.trim();
+            if (!complaintId) {
+            alert("Please enter a Complaint ID");
+            return;
+            }
+            console.log("Complaint ID:", complaintId);
+            window.location.href = `/track/${complaintId}`;
+            document.getElementById('statusDisplay').classList.add('show');
+        });
+
+
+
+        // Track complaint function
+        function trackComplaint() {
+            const complaintId = document.getElementById('complaintId').value.trim().toUpperCase();
+
+            if (complaintId.substring(0, 2) === "PO") {
+            console.log("pothole");
+            }else if(complaintId.substring(0, 2) === "EL") {
+            console.log("electric");
+            }else if(complaintId.substring(0, 2) === "SW") {
+            console.log("solid waste");
+            }
+            
+            if (!complaintId) {
+                showNotification('Please enter a complaint ID', 'error');
+                return;
+            }
+
+            // Display complaint details
+            fetch(`/complaints/${complaintId}`)
+            .then(res => {
+             if (!res.ok) throw new Error("Complaint not found");
+            return res.json();
+            })
+            .then(data => {
+             displayComplaintStatus(data);
+             console.log(data);
+            document.getElementById('statusDisplay').classList.add('show');
+            document.getElementById('statusDisplay').scrollIntoView({ behavior: 'smooth', block: 'start' });
+             })
+            .catch(err => {
+            showNotification(err.message, 'error');
+            });
+
+            
+            // Scroll to status display
+            document.getElementById('statusDisplay').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        // Display complaint status
+        function displayComplaintStatus(complaint) {
+            document.getElementById('displayComplaintId').textContent = complaint.id;
+            document.getElementById('displayCategory').textContent = complaint.category;
+            document.getElementById('displaySubmissionDate').textContent = complaint.submissionDate;
+            document.getElementById('displayLocation').textContent = complaint.location;
+            document.getElementById('displayPriority').textContent = complaint.priority;
+
+            // Update status badge
+            const statusBadge = document.getElementById('currentStatusBadge');
+            statusBadge.textContent = getStatusText(complaint.status);
+            statusBadge.className = `status-badge status-${complaint.status}`;
+
+            // Update progress steps
+            updateProgressSteps(complaint.status, complaint.dates);
+        }
+
+        // Get status text
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'Pending',
+                'acknowledged': 'Acknowledged',
+                'in-progress': 'In Progress',
+                'resolved': 'Resolved'
+            };
+            return statusMap[status] || 'Unknown';
+        }
+
+        // Update progress steps
+        function updateProgressSteps(currentStatus, dates) {
+            const steps = ['pending', 'acknowledged', 'in-progress', 'resolved'];
+            const stepElements = ['step1', 'step2', 'step3', 'step4'];
+            const currentStepIndex = steps.indexOf(currentStatus);
+
+            // Update dates
+            document.getElementById('pendingDate').textContent = dates.pending || '-';
+            document.getElementById('acknowledgedDate').textContent = dates.acknowledged || '-';
+            document.getElementById('progressDate').textContent = dates.inProgress || '-';
+            document.getElementById('resolvedDate').textContent = dates.resolved || '-';
+
+            // Update step classes and progress line
+            stepElements.forEach((stepId, index) => {
+                const stepElement = document.getElementById(stepId);
+                const circle = stepElement.querySelector('.step-circle');
+                
+                stepElement.classList.remove('active', 'completed');
+                
+                if (index < currentStepIndex) {
+                    stepElement.classList.add('completed');
+                    circle.textContent = '✓';
+                } else if (index === currentStepIndex) {
+                    stepElement.classList.add('active');
+                    circle.textContent = index + 1;
+                } else {
+                    circle.textContent = index + 1;
+                }
+            });
+
+            // Update progress line
+            const progressPercentage = (currentStepIndex / (steps.length - 1)) * 100;
+            document.getElementById('progressLineFill').style.width = progressPercentage + '%';
+        }
+
+        // Star rating functionality
+        document.getElementById('starRating').addEventListener('click', function(e) {
+            if (e.target.classList.contains('star')) {
+                const rating = parseInt(e.target.dataset.rating);
+                setRating(rating);
+            }
+        });
+
+        document.getElementById('starRating').addEventListener('mouseover', function(e) {
+            if (e.target.classList.contains('star')) {
+                const rating = parseInt(e.target.dataset.rating);
+                highlightStars(rating);
+            }
+        });
+
+        document.getElementById('starRating').addEventListener('mouseleave', function() {
+            highlightStars(currentRating);
+        });
+
+        function setRating(rating) {
+            currentRating = rating;
+            highlightStars(rating);
+        }
+
+        function highlightStars(rating) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+
+
+        // Submit feedback
+        function submitFeedback(event) {
+            event.preventDefault();
+            
+            const feedbackText = document.getElementById('feedbackText').value.trim();
+            
+            if (currentRating === 0) {
+                showNotification('Please provide a rating', 'error');
+                return;
+            }
+
+            if (!feedbackText) {
+                showNotification('Please enter your feedback', 'error');
+                return;
+            }
+
+            // Simulate feedback submission
+            showNotification('Thank you for your feedback! It has been submitted successfully.', 'success');
+            
+            // Reset form
+            document.getElementById('feedbackText').value = '';
+            setRating(0);
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.background = type === 'error' ? '#ef4444' : '#059669';
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Navigation functions
+        function goHome() {
+            alert('Redirecting to home page');
+        }
+    </script>
+</body>
+</html>

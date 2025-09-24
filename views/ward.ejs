@@ -1,0 +1,1012 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ward Staff Dashboard - Local Execution</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/css/ward.css">
+</head>
+<body>
+    <!-- Top Header -->
+     <%- include("navbar") %>
+    <header class="top-header">
+        <div class="container-fluid">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <div class="govt-logo">
+                        <div class="emblem">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <div>
+                            <h1 class="header-title">Ward Staff Dashboard</h1>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="user-info justify-content-end">
+                        <div class="text-end me-3">
+                            <div class="fw-bold">Ward Executive Officer</div>
+                            <small>Ward 15 - Central Kolkata</small>
+                        </div>
+                        <div class="user-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="dropdown">
+                            <button class="btn btn-link text-white p-0 ms-2" data-bs-toggle="dropdown">
+                                <i class="fas fa-cog"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>Profile</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-cog me-2"></i>Settings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt me-2"></i>Logout</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-2 p-0">
+                <nav class="sidebar">
+                    <div class="nav flex-column p-3">
+                        <a href="#" class="nav-link active" onclick="showPage('dashboard')">
+                            <i class="fas fa-tachometer-alt"></i>Dashboard
+                        </a>
+                        <a href="#" class="nav-link" onclick="showPage('complaints')">
+                            <i class="fas fa-clipboard-list"></i>Complaints
+                        </a>
+                        <a href="#" class="nav-link" onclick="showPage('map')">
+                            <i class="fas fa-map-marked-alt"></i>Ward Map
+                        </a>
+                        <a href="#" class="nav-link" onclick="showPage('teams')">
+                            <i class="fas fa-users"></i>Team Management
+                        </a>
+                        <a href="#" class="nav-link" onclick="showPage('reports')">
+                            <i class="fas fa-chart-bar"></i>Reports
+                        </a>
+                        <hr class="my-3">
+                       
+                    </div>
+                </nav>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-10 main-content" style="margin-left: auto;">
+                <!-- Dashboard Page -->
+                <div id="dashboard" class="page-content active">
+                    <div class="p-4">
+                       
+
+                        <!-- Stats Cards -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-lg-3 col-md-6">
+                                <div class="stats-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="stats-number" id="totalComplaints">127</div>
+                                            <div class="stats-label">Total Complaints</div>
+                                        </div>
+                                        <i class="fas fa-clipboard-list stats-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="stats-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="stats-number text-danger" id="openComplaints">23</div>
+                                            <div class="stats-label">Open</div>
+                                        </div>
+                                        <i class="fas fa-exclamation-circle stats-icon text-danger"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="stats-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="stats-number text-warning" id="progressComplaints">18</div>
+                                            <div class="stats-label">In Progress</div>
+                                        </div>
+                                        <i class="fas fa-clock stats-icon text-warning"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="stats-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="stats-number text-success" id="resolvedComplaints">86</div>
+                                            <div class="stats-label">Resolved</div>
+                                        </div>
+                                        <i class="fas fa-check-circle stats-icon text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- SLA Breach Alerts -->
+                        <div class="row g-4 mb-4">
+                            <div class="col-lg-6">
+                                <div class="content-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-danger"><i class="fas fa-exclamation-triangle me-2"></i>SLA Breaches</h5>
+                                        <div class="stats-number text-danger">4</div>
+                                        <p class="text-muted">Complaints exceeding response time</p>
+                                
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="content-card">
+                                    <div class="card-body">
+                                        <h5 class="card-title text-success"><i class="fas fa-chart-line me-2"></i>Resolution Rate</h5>
+                                        <div class="stats-number text-success">87.2%</div>
+                                        <p class="text-muted">This month's performance</p>
+                                       
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Category Breakdown Chart -->
+                        <div class="element">
+                            <h5 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Complaints by Category</h5>
+                            <canvas id="categoryChart" height="50" width="50"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Complaints Page -->
+                <div id="complaints" class="page-content">
+                    <div class="p-4">
+                       
+
+                        <!-- Filter Bar -->
+                        <div class="filter-bar">
+                            <h6 class="filter-title"><i class="fas fa-filter me-2"></i>Filter & Search Complaints</h6>
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <select class="form-select" id="statusFilter">
+                                        <option value="">All Status</option>
+                                        <option value="Open">Open</option>
+                                        <option value="In Progress">In Progress</option>
+                                        <option value="Resolved">Resolved</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="categoryFilter">
+                                        <option value="">All Categories</option>
+                                        <option value="Sanitation">Sanitation</option>
+                                        <option value="Water Supply">Water Supply</option>
+                                        <option value="Street Light">Street Light</option>
+                                        <option value="Roads">Roads</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select class="form-select" id="priorityFilter">
+                                        <option value="">All Priority</option>
+                                        <option value="High">High</option>
+                                        <option value="Medium">Medium</option>
+                                        <option value="Low">Low</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" placeholder="Search complaints..." id="searchInput">
+                                        <button class="btn btn-govt">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Complaints Table -->
+                        <div class="table-container">
+                            <div class="table-responsive">
+                                <table class="table" id="complaintsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Category</th>
+                                            <th>Description</th>
+                                            <th>Priority</th>
+                                            <th>Status</th>
+                                            <th>SLA Timer</th>
+                                            <th>Assigned To</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="complaintsTableBody">
+                                        <tr data-status="Open" data-category="Sanitation" data-priority="High">
+                                            <td><strong>W15-2024-001</strong></td>
+                                            <td><span class="badge bg-warning">Sanitation</span></td>
+                                            <td>Garbage not collected for 3 days</td>
+                                            <td><span class="status-badge priority-high">High</span></td>
+                                            <td><span class="status-badge status-open">Open</span></td>
+                                            <td><span class="sla-timer sla-danger">2h 30m left</span></td>
+                                            <td>Sanitation Team A</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-govt me-1" onclick="openComplaintModal('W15-2024-001')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-govt" onclick="assignComplaint('W15-2024-001')">
+                                                    <i class="fas fa-user-plus"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="In Progress" data-category="Water Supply" data-priority="High">
+                                            <td><strong>W15-2024-002</strong></td>
+                                            <td><span class="badge bg-info">Water Supply</span></td>
+                                            <td>Water pipe burst in Sector 12</td>
+                                            <td><span class="status-badge priority-high">High</span></td>
+                                            <td><span class="status-badge status-progress">In Progress</span></td>
+                                            <td><span class="sla-timer sla-warning">8h 15m left</span></td>
+                                            <td>Water Team B</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-govt me-1" onclick="openComplaintModal('W15-2024-002')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-govt" onclick="assignComplaint('W15-2024-002')">
+                                                    <i class="fas fa-user-plus"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="Open" data-category="Street Light" data-priority="Medium">
+                                            <td><strong>W15-2024-003</strong></td>
+                                            <td><span class="badge bg-secondary">Street Light</span></td>
+                                            <td>Street light not working in Park Lane</td>
+                                            <td><span class="status-badge priority-medium">Medium</span></td>
+                                            <td><span class="status-badge status-open">Open</span></td>
+                                            <td><span class="sla-timer sla-safe">1d 12h left</span></td>
+                                            <td>Electrical Team</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-govt me-1" onclick="openComplaintModal('W15-2024-003')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-govt" onclick="assignComplaint('W15-2024-003')">
+                                                    <i class="fas fa-user-plus"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="Resolved" data-category="Roads" data-priority="Low">
+                                            <td><strong>W15-2024-004</strong></td>
+                                            <td><span class="badge bg-success">Roads</span></td>
+                                            <td>Pothole repair needed on Main Road</td>
+                                            <td><span class="status-badge priority-low">Low</span></td>
+                                            <td><span class="status-badge status-resolved">Resolved</span></td>
+                                            <td><span class="sla-timer sla-safe">Completed</span></td>
+                                            <td>Road Maintenance</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-secondary" disabled>
+                                                    <i class="fas fa-check"></i> Done
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        <tr data-status="Open" data-category="Sanitation" data-priority="Medium">
+                                            <td><strong>W15-2024-005</strong></td>
+                                            <td><span class="badge bg-warning">Sanitation</span></td>
+                                            <td>Overflowing dustbin near school</td>
+                                            <td><span class="status-badge priority-medium">Medium</span></td>
+                                            <td><span class="status-badge status-open">Open</span></td>
+                                            <td><span class="sla-timer sla-warning">6h 45m left</span></td>
+                                            <td>Unassigned</td>
+                                            <td>
+                                                <button class="btn btn-sm btn-govt me-1" onclick="openComplaintModal('W15-2024-005')">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button class="btn btn-sm btn-outline-govt" onclick="assignComplaint('W15-2024-005')">
+                                                    <i class="fas fa-user-plus"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ward Map Page -->
+                <div id="map" class="page-content">
+                    <div class="p-4">
+                       
+
+                        <div class="row g-4">
+                            <div class="col-lg-9">
+                                <div class="content-card">
+                                    <div class="map-container" id="wardMap"></div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3">
+                                <div class="content-card p-3 mb-3">
+                                    <h6 class="fw-bold mb-3"><i class="fas fa-map-pin me-2"></i>Map Legend</h6>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="bg-danger rounded-circle me-2" style="width: 12px; height: 12px;"></div>
+                                        <small>Open Complaints</small>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="bg-warning rounded-circle me-2" style="width: 12px; height: 12px;"></div>
+                                        <small>In Progress</small>
+                                    </div>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <div class="bg-success rounded-circle me-2" style="width: 12px; height: 12px;"></div>
+                                        <small>Resolved Today</small>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <div class="bg-primary rounded-circle me-2" style="width: 12px; height: 12px;"></div>
+                                        <small>Field Teams</small>
+                                    </div>
+                                </div>
+                                <div class="content-card p-3">
+                                    <h6 class="fw-bold mb-3"><i class="fas fa-users me-2"></i>Active Teams</h6>
+                                    <div class="list-group list-group-flush">
+                                        <div class="list-group-item px-0 py-2 border-0">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <div class="fw-bold">Sanitation Team A</div>
+                                                    <small class="text-muted">3 members active</small>
+                                                </div>
+                                                <span class="badge bg-success">Online</span>
+                                            </div>
+                                        </div>
+                                        <div class="list-group-item px-0 py-2 border-0">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <div class="fw-bold">Water Team B</div>
+                                                    <small class="text-muted">4 members active</small>
+                                                </div>
+                                                <span class="badge bg-success">Online</span>
+                                            </div>
+                                        </div>
+                                        <div class="list-group-item px-0 py-2 border-0">
+                                            <div class="d-flex justify-content-between">
+                                                <div>
+                                                    <div class="fw-bold">Electrical Team</div>
+                                                    <small class="text-muted">2 members active</small>
+                                                </div>
+                                                <span class="badge bg-warning">Busy</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Team Management Page -->
+                <div id="teams" class="page-content">
+                    <div class="p-4">
+                       
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-lg-3 col-md-6">
+                                <div class="stats-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="stats-number text-success">9</div>
+                                            <div class="stats-label">Active Teams</div>
+                                        </div>
+                                        <i class="fas fa-users-cog stats-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="stats-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="stats-number text-primary">34</div>
+                                            <div class="stats-label">Staff Members</div>
+                                        </div>
+                                        <i class="fas fa-user-hard-hat stats-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="stats-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="stats-number text-warning">12</div>
+                                            <div class="stats-label">Tasks Assigned</div>
+                                        </div>
+                                        <i class="fas fa-tasks stats-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-3 col-md-6">
+                                <div class="stats-card">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <div class="stats-number text-info">91%</div>
+                                            <div class="stats-label">Availability</div>
+                                        </div>
+                                        <i class="fas fa-chart-line stats-icon"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Team Assignment Board</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-4">
+                                    <div class="col-lg-4">
+                                        <h6 class="text-danger"><i class="fas fa-exclamation-circle me-2"></i>Pending Tasks (5)</h6>
+                                        <div class="task-column">
+                                            <div class="task-card border-start border-danger border-3 p-3 mb-3 bg-light">
+                                                <div class="fw-bold">W15-2024-001</div>
+                                                <small class="text-muted">Sanitation - High Priority</small>
+                                                <div class="mt-2">
+                                                    <select class="form-select form-select-sm">
+                                                        <option>Assign to team...</option>
+                                                        <option>Sanitation Team A</option>
+                                                        <option>Sanitation Team B</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="task-card border-start border-danger border-3 p-3 mb-3 bg-light">
+                                                <div class="fw-bold">W15-2024-003</div>
+                                                <small class="text-muted">Street Light - Medium Priority</small>
+                                                <div class="mt-2">
+                                                    <select class="form-select form-select-sm">
+                                                        <option>Assign to team...</option>
+                                                        <option>Electrical Team</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h6 class="text-warning"><i class="fas fa-clock me-2"></i>In Progress (3)</h6>
+                                        <div class="task-column">
+                                            <div class="task-card border-start border-warning border-3 p-3 mb-3 bg-light">
+                                                <div class="fw-bold">W15-2024-002</div>
+                                                <small class="text-muted">Water Supply - High Priority</small>
+                                                <div class="mt-2">
+                                                    <span class="badge bg-warning">Water Team B</span>
+                                                    <small class="d-block mt-1">Started: 2 hours ago</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-4">
+                                        <h6 class="text-success"><i class="fas fa-check-circle me-2"></i>Completed (8)</h6>
+                                        <div class="task-column">
+                                            <div class="task-card border-start border-success border-3 p-3 mb-3 bg-light">
+                                                <div class="fw-bold">W15-2024-004</div>
+                                                <small class="text-muted">Roads - Low Priority</small>
+                                                <div class="mt-2">
+                                                    <span class="badge bg-success">Road Maintenance</span>
+                                                    <small class="d-block mt-1">Completed: Today</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reports Page -->
+                <div id="reports" class="page-content">
+                    <div class="p-4">
+                        <div class="page-header">
+                            <h2 class="page-title"><i class="fas fa-chart-bar me-2"></i>Reports & Analytics</h2>
+                            <p class="page-subtitle">Performance insights and trend analysis for Ward 15</p>
+                        </div>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <h5 class="mb-3"><i class="fas fa-chart-line me-2"></i>Weekly Resolution Trends</h5>
+                                    <canvas id="weeklyTrendChart" height="80"></canvas>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="chart-container">
+                                    <h5 class="mb-3"><i class="fas fa-chart-pie me-2"></i>Team Performance</h5>
+                                    <canvas id="teamPerformanceChart" height="80"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="content-card">
+            
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Complaint Action Modal -->
+    <div class="modal fade" id="complaintModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Update Complaint Status</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label class="form-label">Complaint ID</label>
+                            <input type="text" class="form-control" id="modalComplaintId" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="modalStatus">
+                                <option value="Open">Open</option>
+                                <option value="In Progress">In Progress</option>
+                                <option value="Resolved">Resolved</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Assign to Team</label>
+                            <select class="form-select" id="modalTeam">
+                                <option value="">Select Team</option>
+                                <option value="Sanitation Team A">Sanitation Team A</option>
+                                <option value="Sanitation Team B">Sanitation Team B</option>
+                                <option value="Water Team A">Water Team A</option>
+                                <option value="Water Team B">Water Team B</option>
+                                <option value="Electrical Team">Electrical Team</option>
+                                <option value="Road Maintenance">Road Maintenance</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Priority</label>
+                            <select class="form-select" id="modalPriority">
+                                <option value="Low">Low</option>
+                                <option value="Medium">Medium</option>
+                                <option value="High">High</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Update Notes</label>
+                            <textarea class="form-control" rows="3" id="modalNotes" placeholder="Add progress notes or resolution details..."></textarea>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Upload Proof (Photos/Documents)</label>
+                            <div class="file-upload-area" onclick="document.getElementById('fileInput').click()">
+                                <i class="fas fa-cloud-upload-alt fa-2x text-muted mb-2"></i>
+                                <div>Click to upload or drag files here</div>
+                                <small class="text-muted">Supports: JPG, PNG, PDF (Max 5MB)</small>
+                                <input type="file" id="fileInput" multiple accept=".jpg,.jpeg,.png,.pdf" style="display: none;">
+                            </div>
+                            <div id="uploadedFiles" class="mt-2"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-govt" onclick="updateComplaint()">
+                        <i class="fas fa-save me-1"></i>Update Complaint
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // Global Variables
+        let wardMap;
+        let currentPage = 'dashboard';
+        let complaints = [];
+
+        // Initialize Dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Ward Staff Dashboard initialized');
+            initializeCharts();
+            loadComplaintsData();
+            
+            // Auto-refresh every 30 seconds
+            setInterval(refreshDashboard, 30000);
+            
+            // Initialize file upload handler
+            initFileUpload();
+        });
+
+        // Page Navigation
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-content').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Remove active class from all nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Add active class to clicked nav link
+            event.target.classList.add('active');
+            
+            currentPage = pageId;
+            
+            // Initialize map if map page is selected
+            if (pageId === 'map' && !wardMap) {
+                setTimeout(initializeMap, 300);
+            }
+            
+            console.log(`Switched to ${pageId} page`);
+        }
+
+        // Initialize Charts
+        function initializeCharts() {
+            // Category Chart
+            const categoryCtx = document.getElementById('categoryChart');
+            if (categoryCtx) {
+                new Chart(categoryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Sanitation', 'Water Supply', 'Street Light', 'Roads', 'Others'],
+                        datasets: [{
+                            data: [35, 25, 20, 15, 5],
+                            backgroundColor: ['#fbbf24', '#3b82f6', '#6b7280', '#10b981', '#f59e0b'],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Weekly Trend Chart
+            const weeklyCtx = document.getElementById('weeklyTrendChart');
+            if (weeklyCtx) {
+                new Chart(weeklyCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                        datasets: [{
+                            label: 'Resolved',
+                            data: [12, 15, 8, 18, 22, 16, 14],
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }, {
+                            label: 'New Complaints',
+                            data: [8, 12, 6, 14, 18, 12, 10],
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            tension: 0.3,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Team Performance Chart
+            const teamCtx = document.getElementById('teamPerformanceChart');
+            if (teamCtx) {
+                new Chart(teamCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Sanitation A', 'Sanitation B', 'Water A', 'Water B', 'Electrical', 'Roads'],
+                        datasets: [{
+                            label: 'Efficiency %',
+                            data: [92, 88, 95, 87, 90, 85],
+                            backgroundColor: ['#10b981', '#3b82f6', '#fbbf24', '#f59e0b', '#6b7280', '#8b5cf6']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 100
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // Initialize Map
+        function initializeMap() {
+            if (wardMap) return;
+            
+            wardMap = L.map('wardMap').setView([28.6139, 77.2090], 14); // Delhi coordinates
+            
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(wardMap);
+
+            // Sample complaint locations
+            const complaintLocations = [
+                { id: 'W15-2024-001', lat: 28.6139, lng: 77.2090, status: 'open', category: 'Sanitation' },
+                { id: 'W15-2024-002', lat: 28.6150, lng: 77.2100, status: 'progress', category: 'Water Supply' },
+                { id: 'W15-2024-003', lat: 28.6120, lng: 77.2080, status: 'open', category: 'Street Light' },
+                { id: 'W15-2024-004', lat: 28.6160, lng: 77.2110, status: 'resolved', category: 'Roads' },
+                { id: 'W15-2024-005', lat: 28.6130, lng: 77.2070, status: 'open', category: 'Sanitation' }
+            ];
+
+            // Add markers to map
+            complaintLocations.forEach(complaint => {
+                let color = '#ef4444'; // red for open
+                if (complaint.status === 'progress') color = '#fbbf24'; // yellow for in progress
+                if (complaint.status === 'resolved') color = '#10b981'; // green for resolved
+
+                const marker = L.circleMarker([complaint.lat, complaint.lng], {
+                    radius: 8,
+                    fillColor: color,
+                    color: '#fff',
+                    weight: 2,
+                    opacity: 1,
+                    fillOpacity: 0.8
+                }).addTo(wardMap);
+
+                marker.bindPopup(`
+                    <div class="p-2">
+                        <strong>${complaint.id}</strong><br>
+                        Category: ${complaint.category}<br>
+                        Status: ${complaint.status}<br>
+                        <button class="btn btn-sm btn-govt mt-2" onclick="openComplaintModal('${complaint.id}')">
+                            Update Status
+                        </button>
+                    </div>
+                `);
+            });
+
+            // Add team locations
+            const teamLocations = [
+                { name: 'Sanitation Team A', lat: 28.6145, lng: 77.2085 },
+                { name: 'Water Team B', lat: 28.6155, lng: 77.2095 }
+            ];
+
+            teamLocations.forEach(team => {
+                L.marker([team.lat, team.lng], {
+                    icon: L.divIcon({
+                        className: 'team-marker',
+                        html: '<i class="fas fa-users" style="color: #1e40af;"></i>',
+                        iconSize: [20, 20]
+                    })
+                }).addTo(wardMap).bindPopup(`<strong>${team.name}</strong><br>Status: Active`);
+            });
+        }
+
+        // Load Complaints Data
+        function loadComplaintsData() {
+            // Simulated complaint data - in real app, this would come from API
+            complaints = [
+                {
+                    id: 'W15-2024-001',
+                    category: 'Sanitation',
+                    description: 'Garbage not collected for 3 days',
+                    priority: 'High',
+                    status: 'Open',
+                    assignedTo: 'Sanitation Team A',
+                    slaTime: '2h 30m left',
+                    slaStatus: 'danger'
+                },
+                {
+                    id: 'W15-2024-002',
+                    category: 'Water Supply',
+                    description: 'Water pipe burst in Sector 12',
+                    priority: 'High',
+                    status: 'In Progress',
+                    assignedTo: 'Water Team B',
+                    slaTime: '8h 15m left',
+                    slaStatus: 'warning'
+                }
+                // Add more complaint data as needed
+            ];
+        }
+
+        // Open Complaint Modal
+        function openComplaintModal(complaintId) {
+            const complaint = complaints.find(c => c.id === complaintId) || {
+                id: complaintId,
+                category: 'Sanitation',
+                priority: 'Medium',
+                status: 'Open',
+                assignedTo: ''
+            };
+
+            document.getElementById('modalComplaintId').value = complaint.id;
+            document.getElementById('modalStatus').value = complaint.status;
+            document.getElementById('modalTeam').value = complaint.assignedTo;
+            document.getElementById('modalPriority').value = complaint.priority;
+
+            const modal = new bootstrap.Modal(document.getElementById('complaintModal'));
+            modal.show();
+        }
+
+        // Update Complaint
+        function updateComplaint() {
+            const complaintId = document.getElementById('modalComplaintId').value;
+            const status = document.getElementById('modalStatus').value;
+            const team = document.getElementById('modalTeam').value;
+            const priority = document.getElementById('modalPriority').value;
+            const notes = document.getElementById('modalNotes').value;
+
+            // Update complaint in memory (in real app, this would be API call)
+            const complaint = complaints.find(c => c.id === complaintId);
+            if (complaint) {
+                complaint.status = status;
+                complaint.assignedTo = team;
+                complaint.priority = priority;
+                complaint.notes = notes;
+            }
+
+            // Update table display
+            updateComplaintTable();
+
+            // Close modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('complaintModal'));
+            modal.hide();
+
+            // Show success message
+            showNotification('Complaint updated successfully!', 'success');
+        }
+
+        // Update Complaint Table
+        function updateComplaintTable() {
+            const tableBody = document.getElementById('complaintsTableBody');
+            // This would typically re-render the table with updated data
+            console.log('Table updated with latest complaint data');
+        }
+
+        // Assign Complaint
+        function assignComplaint(complaintId) {
+            openComplaintModal(complaintId);
+            // Focus on team selection
+            setTimeout(() => {
+                document.getElementById('modalTeam').focus();
+            }, 500);
+        }
+
+        // Initialize File Upload
+        function initFileUpload() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.querySelector('.file-upload-area');
+            const uploadedFiles = document.getElementById('uploadedFiles');
+
+            if (!fileInput || !uploadArea) return;
+
+            fileInput.addEventListener('change', function() {
+                const files = Array.from(this.files);
+                displayUploadedFiles(files);
+            });
+
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                this.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                this.classList.remove('dragover');
+                const files = Array.from(e.dataTransfer.files);
+                displayUploadedFiles(files);
+            });
+        }
+
+        // Display Uploaded Files
+        function displayUploadedFiles(files) {
+            const uploadedFiles = document.getElementById('uploadedFiles');
+            uploadedFiles.innerHTML = '';
+
+            files.forEach(file => {
+                const fileElement = document.createElement('div');
+                fileElement.className = 'alert alert-info alert-dismissible fade show';
+                fileElement.innerHTML = `
+                    <i class="fas fa-file me-2"></i>${file.name} (${(file.size / 1024).toFixed(1)} KB)
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                uploadedFiles.appendChild(fileElement);
+            });
+        }
+
+        // Show Notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(notification);
+
+            // Auto dismiss after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+
+        // Filter Functions
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter')?.value || '';
+            const categoryFilter = document.getElementById('categoryFilter')?.value || '';
+            const priorityFilter = document.getElementById('priorityFilter')?.value || '';
+            const searchFilter = document.getElementById('searchInput')?.value || '';
+
+            const tableRows = document.querySelectorAll('#complaintsTableBody tr');
+
+            tableRows.forEach(row => {
+                const status = row.dataset.status || '';
+                const category = row.dataset.category || '';
+                const priority = row.dataset.priority || '';
+                const text = row.textContent.toLowerCase();
+
+                const statusMatch = !statusFilter || status === statusFilter;
+                const categoryMatch = !categoryFilter || category === categoryFilter;
+                const priorityMatch = !priorityFilter || priority === priorityFilter;
+                const searchMatch = !searchFilter || text.includes(searchFilter.toLowerCase());
+
+                if (statusMatch && categoryMatch && priorityMatch && searchMatch) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            console.log('Filters applied');
+        }
+
+        // Add event listeners for filters
+        document.addEventListener('DOMContentLoaded', function() {
+            const filters = ['statusFilter', 'categoryFilter', 'priorityFilter', 'searchInput'];
+            filters.forEach(filterId => {
+                const element = document.getElementById(filterId);
+                if (element) {
+                    element.addEventListener('change', applyFilters);
+                    if (filterId === 'searchInput') {
+                        element.addEventListener('input', applyFilters);
+                    }
+                }
+            });
+        });
+  </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<nav class="navbar">
+  <div class="logo">CityZen MVP</div>
+  <ul class="nav-links">
+    <!-- Dropdown for Departments -->
+    <li class="dropdown">
+      <a href="#">Departments ▾</a>
+      <ul class="dropdown-menu">
+        <li><a href="/electricity">Electricity Dashboard</a></li>
+        <li><a href="/pothole">Pothole Dashboard</a></li>
+        <li><a href="/waste">Solid Waste Dashboard</a></li>
+      </ul>
+    </li>
+    
+    <!-- Keep these separate -->
+    <li><a href="/ward">Ward Dashboard</a></li>
+    <li><a href="/">Citizen Dashboard</a></li>
+  </ul>
+</nav>
+
+<style>
+  .navbar {
+    background: #333;
+    color: #fff;
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .nav-links {
+    list-style: none;
+    display: flex;
+    gap: 1rem;
+    position: relative;
+  }
+
+  .nav-links li {
+    position: relative;
+  }
+
+  .nav-links a {
+    color: white;
+    text-decoration: none;
+    padding: 0.5rem;
+  }
+
+  /* Dropdown menu hidden by default */
+  .dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: #444;
+    list-style: none;
+    padding: 0.5rem 0;
+    min-width: 180px;
+    border-radius: 4px;
+    z-index: 9999;
+  }
+
+  .dropdown-menu li {
+    width: 100%;
+  }
+
+  .dropdown-menu a {
+    display: block;
+    padding: 0.5rem 1rem;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .dropdown-menu a:hover {
+    background: #555;
+  }
+
+  /* Show dropdown on hover */
+  .dropdown:hover .dropdown-menu {
+    display: block;
+  }
+</style>

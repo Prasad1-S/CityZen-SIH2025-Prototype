@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CITIZEN - Report Civic Issues</title>
+    <link rel="stylesheet" href="/css/citizen.css">
+</head>
+<body>
+    <!-- Header -->
+     <%- include("navbar") %>
+    <div class="header">
+        <div class="header-content">
+            <a href="#" class="logo" onclick="showSection('home')">
+                <div class="logo-icon">C</div>
+                <span>CITYZEN</span>
+            </a>
+            
+            <div class="nav-menu">
+                <button class="nav-btn home-btn" onclick="showSection('home')">Home</button>
+                <a href="/track-status" class="nav-btn">Track by ID</a>
+                <button class="nav-btn" onclick="showSection('map')">Track on Maps</button>
+            </div>
+
+            <div class="user-section">
+                <span id="userDisplay" class="user-display">Guest</span>
+                <button id="loginBtn" class="login-btn">Login</button>
+                <button id="logoutBtn" class="logout-btn" style="display:none;">Logout</button>
+            </div>
+        </div>
+    </div>
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Home/Landing Page - Clean Form Only -->
+        <div id="home" class="section active">
+            <div class="landing-page">
+                <div class="report-form-card">
+                    <div class="form-header">
+                        <h1>Report a Civic Issue</h1>
+                    </div>
+
+                    <form id="issueForm" action="/submit" method="post">
+
+                        <div class="form-group">
+                            <label class="form-label">Upload Photo/Video</label>
+                            <div class="upload-area" onclick="document.getElementById('mediaInput').click()">
+                                <div class="upload-icon">📷</div>
+                                <div class="upload-text">Click to upload media</div>
+                                <div class="upload-subtext">Photos and videos help us understand the issue better</div>
+                                <input type="file" id="mediaInput" accept="image/*,video/*" style="display: none;">
+                            </div>
+                            <!-- Preview container -->
+                            <div id="preview" class="media-preview"></div>
+                        </div>
+
+
+  <div class="form-group">
+    <label class="form-label">Description *</label>
+    <textarea class="form-input textarea" id="description" name="description" placeholder="Please describe the civic issue in detail..." required></textarea>
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Phone Number (Optional)</label>
+    <input type="tel" class="form-input" id="reporterPhone" name="reporterPhone" placeholder="Enter your phone number">
+  </div>
+
+  <div class="form-group">
+    <label class="form-label">Location</label>
+    <input type="text" class="form-input" id="location" name="location" placeholder="Enter your location">
+    <button type="button" class="location-btn" onclick="detectLocation()">
+      <span>📍</span>
+      <span>Detect My Current Location</span>
+    </button>
+    <div class="location-grid">
+      <input type="text" class="form-input" id="latitude" name="latitude" placeholder="Latitude" readonly>
+      <input type="text" class="form-input" id="longitude" name="longitude" placeholder="Longitude" readonly>
+    </div>
+  </div>
+
+  <button type="submit" class="submit-btn">
+    <span>✓</span>
+    Submit Report
+  </button>
+</form>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Track by ID Section -->
+        
+
+        <!-- Track on Maps Section -->
+        <div id="map" class="section">
+            <div class="map-section">
+            <div class="form-header">
+                    <h1>Issues on Map</h1>
+                    <p>View all reported issues in your area on an interactive map</p>
+                </div>
+
+                <div class="map-container">
+                <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d14713.98239317837!2d87.8550022!3d22.9867561!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3a0277b1b1b1b1b1%3A0x1b1b1b1b1b1b1b1b!2sWest%20Bengal!5e0!3m2!1sen!2sin!4v1717580000000!5m2!1sen!2sin" 
+                width="100%" 
+                height="100%" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+        <p>&copy; 2025 CITIZEN - Civic Issue Reporting System | Making Cities Better Together</p>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification">
+        <span id="notificationText"></span>
+    </div>
+
+    <style>
+        /* Additional styles for media preview */
+        .media-preview {
+            margin-top: 15px;
+            display: none;
+            position: relative;
+        }
+
+        .media-preview.show {
+            display: block;
+        }
+
+        .preview-item {
+            position: relative;
+            display: inline-block;
+            margin: 10px;
+            overflow: hidden;
+            background: white;
+            border: 2px solid #e5e7eb;
+        }
+
+        .preview-item img,
+        .preview-item video {
+            max-width: 200px;
+            max-height: 200px;
+            width: auto;
+            height: auto;
+            display: block;
+            border-radius: 8px;
+        }
+
+        .preview-remove {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            transition: all 0.2s ease;
+        }
+
+        .preview-remove:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .preview-info {
+            padding: 8px;
+            font-size: 12px;
+            color: #6b7280;
+            text-align: center;
+            border-top: 1px solid #f3f4f6;
+        }
+
+        .upload-area.has-file {
+            border-color: #10b981;
+            background-color: #f0fdfa;
+        }
+
+        .upload-area.has-file .upload-icon {
+            color: #10b981;
+        }
+
+        .upload-area.has-file .upload-text {
+            color: #10b981;
+        }
+
+        /* Drag and drop styles */
+        .upload-area.drag-over {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+            transform: scale(1.02);
+        }
+    </style>
+
+    <script>
+        // State management
+        let currentUser = null;
+        let issues = [];
+        let issueCounter = 1;
+        let uploadedFiles = []; // Store uploaded files
+
+        // In-memory storage (replacing localStorage for Claude environment)
+        const appData = {};
+        function setItem(key, value) { appData[key] = value; }
+        function getItem(key) { return appData[key]; }
+        function removeItem(key) { delete appData[key]; }
+
+        // Initialize app
+        window.onload = function() {
+            loadUser();
+            setTimeout(detectLocation, 500);
+            setupFileUpload();
+        };
+
+        // Navigation
+        function showSection(sectionId) {
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
+
+            // Update nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('home-btn');
+            });
+            if (sectionId === 'home') {
+                document.querySelector('[onclick="showSection(\'home\')"]').classList.add('home-btn');
+            }
+        }
+
+        // User management
+        function loadUser() {
+            const savedUser = getItem('currentUser');
+            if (savedUser) {
+                currentUser = savedUser;
+                document.getElementById('userDisplay').textContent = currentUser;
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'inline-block';
+            }
+        }
+
+        // Login system
+        document.getElementById('loginBtn')?.addEventListener('click', () => {
+            document.getElementById('loginPopup').style.display = 'flex';
+        });
+
+        document.getElementById('closePopup')?.addEventListener('click', () => {
+            document.getElementById('loginPopup').style.display = 'none';
+        });
+
+        document.getElementById('loginForm')?.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            if (username) {
+                currentUser = username;
+                setItem('currentUser', username);
+                document.getElementById('userDisplay').textContent = username;
+                document.getElementById('loginPopup').style.display = 'none';
+                document.getElementById('loginBtn').style.display = 'none';
+                document.getElementById('logoutBtn').style.display = 'inline-block';
+                showNotification('Welcome, ' + username + '!');
+                document.getElementById('username').value = '';
+            }
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            currentUser = null;
+            removeItem('currentUser');
+            document.getElementById('userDisplay').textContent = 'Guest';
+            document.getElementById('loginBtn').style.display = 'inline-block';
+            document.getElementById('logoutBtn').style.display = 'none';
+            showNotification('Logged out successfully');
+        });
+
+        // Location detection
+        function detectLocation() {
+            const latField = document.getElementById('latitude');
+            const lngField = document.getElementById('longitude');
+            
+            if (navigator.geolocation) {
+                latField.placeholder = 'Detecting...';
+                lngField.placeholder = 'Detecting...';
+                
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        latField.value = position.coords.latitude.toFixed(6);
+                        lngField.value = position.coords.longitude.toFixed(6);
+                        showNotification('Location detected successfully');
+                    },
+                    function(error) {
+                        console.log('Location error:', error);
+                        // Demo location (Kolkata, West Bengal, India)
+                        latField.value = '22.5726';
+                        lngField.value = '88.3639';
+                    }
+                );
+            } else {
+                latField.value = '23.8103';
+                lngField.value = '90.4125';
+            }
+        }
+
+        // Enhanced File Upload with Preview
+        function setupFileUpload() {
+            const mediaInput = document.getElementById('mediaInput');
+            const uploadArea = document.querySelector('.upload-area');
+            const preview = document.getElementById('preview');
+
+            // Handle file selection
+            mediaInput.addEventListener('change', handleFileSelect);
+
+            // Drag and drop functionality
+            uploadArea.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadArea.classList.add('drag-over');
+            });
+
+            uploadArea.addEventListener('dragleave', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+            });
+
+            uploadArea.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadArea.classList.remove('drag-over');
+                
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    // Simulate file input selection
+                    const dt = new DataTransfer();
+                    for (let file of files) {
+                        if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                            dt.items.add(file);
+                        }
+                    }
+                    mediaInput.files = dt.files;
+                    handleFileSelect({ target: mediaInput });
+                }
+            });
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            const uploadArea = document.querySelector('.upload-area');
+            const uploadText = document.querySelector('.upload-text');
+            const uploadSubtext = document.querySelector('.upload-subtext');
+            const uploadIcon = document.querySelector('.upload-icon');
+            const preview = document.getElementById('preview');
+
+            if (files.length === 0) {
+                resetUploadArea();
+                return;
+            }
+
+            // Clear previous previews
+            preview.innerHTML = '';
+            uploadedFiles = [];
+
+            // Update upload area appearance
+            uploadArea.classList.add('has-file');
+            uploadIcon.innerHTML = '✅';
+
+            if (files.length === 1) {
+                uploadText.textContent = `✓ ${files[0].name}`;
+                uploadSubtext.textContent = 'File selected successfully';
+            } else {
+                uploadText.textContent = `✓ ${files.length} files selected`;
+                uploadSubtext.textContent = 'Files selected successfully';
+            }
+
+            // Process each file
+            Array.from(files).forEach((file, index) => {
+                if (file.type.startsWith('image/') || file.type.startsWith('video/')) {
+                    uploadedFiles.push(file);
+                    createPreviewItem(file, index);
+                }
+            });
+
+            // Show preview container
+            preview.classList.add('show');
+        }
+
+        function createPreviewItem(file, index) {
+            const preview = document.getElementById('preview');
+            const previewItem = document.createElement('div');
+            previewItem.className = 'preview-item';
+            previewItem.setAttribute('data-index', index);
+
+            // Create remove button
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'preview-remove';
+            removeBtn.innerHTML = '×';
+            removeBtn.onclick = (e) => {
+                e.stopPropagation();
+                removePreviewItem(index);
+            };
+
+            // Create media element
+            let mediaElement;
+            if (file.type.startsWith('image/')) {
+                mediaElement = document.createElement('img');
+                mediaElement.src = URL.createObjectURL(file);
+                mediaElement.onload = () => URL.revokeObjectURL(mediaElement.src);
+            } else if (file.type.startsWith('video/')) {
+                mediaElement = document.createElement('video');
+                mediaElement.src = URL.createObjectURL(file);
+                mediaElement.controls = true;
+                mediaElement.onloadedmetadata = () => URL.revokeObjectURL(mediaElement.src);
+            }
+
+            // Create info section
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'preview-info';
+            infoDiv.textContent = `${file.name} (${formatFileSize(file.size)})`;
+
+            // Assemble preview item
+            previewItem.appendChild(removeBtn);
+            previewItem.appendChild(mediaElement);
+            previewItem.appendChild(infoDiv);
+            preview.appendChild(previewItem);
+        }
+
+        function removePreviewItem(index) {
+            const preview = document.getElementById('preview');
+            const previewItem = preview.querySelector(`[data-index="${index}"]`);
+            
+            if (previewItem) {
+                previewItem.remove();
+                uploadedFiles.splice(index, 1);
+                
+                // Update indices of remaining items
+                const remainingItems = preview.querySelectorAll('.preview-item');
+                remainingItems.forEach((item, newIndex) => {
+                    item.setAttribute('data-index', newIndex);
+                });
+                
+                // If no files left, reset upload area
+                if (uploadedFiles.length === 0) {
+                    resetUploadArea();
+                } else {
+                    // Update upload text
+                    const uploadText = document.querySelector('.upload-text');
+                    const uploadSubtext = document.querySelector('.upload-subtext');
+                    
+                    if (uploadedFiles.length === 1) {
+                        uploadText.textContent = `✓ ${uploadedFiles[0].name}`;
+                        uploadSubtext.textContent = 'File selected successfully';
+                    } else {
+                        uploadText.textContent = `✓ ${uploadedFiles.length} files selected`;
+                        uploadSubtext.textContent = 'Files selected successfully';
+                    }
+                }
+            }
+        }
+
+        function resetUploadArea() {
+            const uploadArea = document.querySelector('.upload-area');
+            const uploadText = document.querySelector('.upload-text');
+            const uploadSubtext = document.querySelector('.upload-subtext');
+            const uploadIcon = document.querySelector('.upload-icon');
+            const preview = document.getElementById('preview');
+            const mediaInput = document.getElementById('mediaInput');
+
+            uploadArea.classList.remove('has-file');
+            uploadIcon.innerHTML = '📷';
+            uploadText.textContent = 'Click to upload media';
+            uploadSubtext.textContent = 'Photos and videos help us understand the issue better';
+            preview.classList.remove('show');
+            preview.innerHTML = '';
+            uploadedFiles = [];
+            mediaInput.value = '';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Form submission
+        document.getElementById('issueForm').addEventListener('submit', function(e) {
+            
+            
+            const description = document.getElementById('description').value.trim();
+            if (!description) {
+                showNotification('Please provide a description');
+                return;
+            }
+            
+            const issueId = 'CIT-2025-' + String(issueCounter).padStart(3, '0');
+            const issue = {
+                id: issueId,
+                description: description,
+                latitude: document.getElementById('latitude').value,
+                longitude: document.getElementById('longitude').value,
+                name: document.getElementById('reporterName')?.value || '',
+                phone: document.getElementById('reporterPhone').value,
+                status: 'Pending',
+                date: new Date().toLocaleDateString(),
+                reporter: currentUser || 'Anonymous',
+                mediaCount: uploadedFiles.length
+            };
+            
+            issues.push(issue);
+            setItem('issues', issues);
+            issueCounter++;
+            
+            // Success feedback
+            const button = document.querySelector('.submit-btn');
+            const originalText = button.innerHTML;
+            button.innerHTML = '<span>✓</span> Report Submitted!';
+            button.style.background = '#10b981';
+            
+            setTimeout(function() {
+                button.innerHTML = originalText;
+                button.style.background = 'linear-gradient(135deg, #059669, #10b981)';
+                document.getElementById('issueForm').reset();
+                resetUploadArea();
+                setTimeout(detectLocation, 500);
+            }, 2000);
+            
+            let mediaText = uploadedFiles.length > 0 ? ` (${uploadedFiles.length} file${uploadedFiles.length > 1 ? 's' : ''} attached)` : '';
+        });
+
+        // Issue tracking
+        function trackIssue() {
+            const trackId = document.getElementById('trackId')?.value.trim();
+            const statusDiv = document.getElementById('statusResult');
+            
+            if (!trackId) {
+                showNotification('Please enter an Issue ID');
+                return;
+            }
+
+            // Demo data
+            const statuses = ['Pending', 'In Progress', 'Resolved'];
+            const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
+            
+            if (statusDiv) {
+                statusDiv.innerHTML = `
+                    <h3 style="margin-bottom: 1rem; color: #1f2937;">Issue Details</h3>
+                    <p><strong>ID:</strong> ${trackId}</p>
+                    <p><strong>Status:</strong> <span class="status-badge status-${randomStatus.toLowerCase().replace(' ', '-')}">${randomStatus}</span></p>
+                    <p><strong>Reported:</strong> ${new Date().toLocaleDateString()}</p>
+                    <p><strong>Description:</strong> Sample civic issue for demonstration</p>
+                    <p style="margin-top: 1rem; font-style: italic; color: #6b7280;">Last updated: ${new Date().toLocaleDateString()}</p>
+                `;
+                
+                statusDiv.classList.add('show');
+            }
+        }
+
+        // Notification system
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const text = document.getElementById('notificationText');
+            text.textContent = message;
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Close popup when clicking outside
+        document.getElementById('loginPopup')?.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.style.display = 'none';
+            }
+        });
+
+        // Category AI Auto Detection
+        const aiRules = [
+            {
+                category: 'Road Damage',
+                keywords: ['road', 'pothole', 'asphalt', 'crack', 'speed breaker', 'shoulder', 'manhole'],
+                criticalKeywords: ['pothole', 'accident', 'collapse'],
+                defaultPriority: 'Medium'
+            },
+            {
+                category: 'Garbage / Sanitation',
+                keywords: ['garbage', 'trash', 'waste', 'dump', 'litter', 'sanitation', 'dumpster', 'collection'],
+                criticalKeywords: [],
+                defaultPriority: 'High'
+            },
+            {
+                category: 'Water Leakage / Supply',
+                keywords: ['water', 'leak', 'pipeline', 'tap', 'burst', 'tank', 'supply', 'contamination'],
+                criticalKeywords: ['burst', 'flood', 'contamination'],
+                defaultPriority: 'Medium'
+            },
+            {
+                category: 'Street Light / Electricity',
+                keywords: ['light', 'streetlight', 'bulb', 'pole', 'electric', 'transformer', 'power', 'outage'],
+                criticalKeywords: ['dark', 'short circuit', 'shock'],
+                defaultPriority: 'Medium'
+            },
+            {
+                category: 'Drainage / Sewage / Waterlogging',
+                keywords: ['sewage', 'drain', 'gutter', 'clog', 'overflow', 'waterlogging', 'stormwater', 'silt'],
+                criticalKeywords: ['flood', 'overflow'],
+                defaultPriority: 'Medium'
+            },
+            {
+                category: 'Noise Pollution',
+                keywords: ['noise', 'loud', 'speaker', 'dj', 'construction', 'honking'],
+                criticalKeywords: [],
+                defaultPriority: 'Normal'
+            },
+            {
+                category: 'Public Safety / Hazard',
+                keywords: ['open wire', 'exposed', 'collapse risk', 'broken railing', 'sinkhole'],
+                criticalKeywords: ['open wire', 'exposed', 'collapse', 'sinkhole'],
+                defaultPriority: 'Critical'
+            },
+            {
+                category: 'Encroachment / Illegal Parking',
+                keywords: ['encroach', 'hawker', 'illegal', 'parking', 'blockage'],
+                criticalKeywords: [],
+                defaultPriority: 'Medium'
+            },
+            {
+                category: 'Tree / Greenery',
+                keywords: ['tree', 'branch', 'fallen', 'trimming', 'park'],
+                criticalKeywords: [],
+                defaultPriority: 'Medium'
+            },
+            {
+                category: 'Animals / Strays',
+                keywords: ['stray', 'dog', 'cattle', 'dead animal'],
+                criticalKeywords: [],
+                defaultPriority: 'Medium'
+            }
+        ];
+
+        document.getElementById('description').addEventListener('input', function() {
+            const text = this.value.toLowerCase();
+            let detectedCategory = '';
+            let detectedPriority = '';
+            for (const rule of aiRules) {
+                if (rule.keywords.some(k => text.includes(k))) {
+                    detectedCategory = rule.category;
+                    detectedPriority = rule.defaultPriority;
+                    if (rule.criticalKeywords && rule.criticalKeywords.some(k => text.includes(k))) {
+                        detectedPriority = 'Critical';
+                    }
+                    break;
+                }
+            }
+            const categoryField = document.getElementById('category');
+            if (categoryField) {
+                categoryField.value = detectedCategory ? `${detectedCategory} (${detectedPriority})` : '';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Electricity Department</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="/css/electricity.css">
+</head>
+<body>
+    <%- include("navbar") %>
+    <div class="container-fluid">
+        <!-- Header -->
+        <header class="header">
+
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo-section">
+                        <div class="govt-emblem d-flex align-items-center justify-content-center me-2">
+                            <i class="fa-solid fa-tower-observation"></i>
+                        </div>
+                        <div>
+                            <div class="logo">Electricity Department</div>
+                        </div>
+
+                    </div>
+                    <nav class="nav-tabs">
+                        <button class="nav-tab active" onclick="switchPage('overview')">
+                            <i class="fas fa-chart-bar me-2"></i>Overview & Analytics
+                        </button>
+                        <button class="nav-tab" onclick="switchPage('complaints')">
+                            <i class="fas fa-clipboard-list me-2"></i>Complaints
+                        </button>
+                        <button class="nav-tab" onclick="switchPage('map')">
+                            <i class="fas fa-map-marked-alt me-2"></i>Track on Map
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Overview Page -->
+                <div id="overview" class="page active">
+
+                    <div class="row g-4 mb-4">
+                        <div class="col-lg-3 col-md-6">
+                            <div class="stat-card">
+                                <i class="fas fa-exclamation-circle stat-icon"></i>
+                                <div class="stat-number">1,247</div>
+                                <div class="stat-label">Total Complaints</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="stat-card">
+                                <i class="fas fa-check-circle stat-icon"></i>
+                                <div class="stat-number">892</div>
+                                <div class="stat-label">Resolved</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="stat-card">
+                                <i class="fas fa-clock stat-icon"></i>
+                                <div class="stat-number">245</div>
+                                <div class="stat-label">Pending</div>
+                            </div>
+                        </div>
+                        <div class="col-lg-3 col-md-6">
+                            <div class="stat-card">
+                                <i class="fas fa-cog stat-icon"></i>
+                                <div class="stat-number">110</div>
+                                <div class="stat-label">In Progress</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Complaints Page -->
+                <div id="complaints" class="page">
+
+
+                    <!-- Filters Section -->
+                    <div class="filters-section">
+                        <h5 class="mb-3"><i class="fas fa-filter me-2"></i>Filter Complaints</h5>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label class="filter-label">Ward Number</label>
+                                <select class="form-select" id="wardFilter" onchange="applyFilters()">
+                                    <option value="">All Wards</option>
+                                    <option value="Ward 1">Ward 1</option>
+                                    <option value="Ward 2">Ward 2</option>
+                                    <option value="Ward 3">Ward 3</option>
+                                    <option value="Ward 4">Ward 4</option>
+                                    <option value="Ward 5">Ward 5</option>
+                                    <option value="Ward 6">Ward 6</option>
+                                    <option value="Ward 7">Ward 7</option>
+                                    <option value="Ward 8">Ward 8</option>
+                                    <option value="Ward 9">Ward 9</option>
+                                    <option value="Ward 10">Ward 10</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="filter-label">Status</label>
+                                <select class="form-select" id="statusFilter" onchange="applyFilters()">
+                                    <option value="">All Status</option>
+                                    <option value="Pending">Pending</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Resolved">Resolved</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="filter-label">Sort by Deadline</label>
+                                <select class="form-select" id="deadlineFilter" onchange="applyFilters()">
+                                    <option value="">Default Order</option>
+                                    <option value="asc">Earliest Deadline First</option>
+                                    <option value="desc">Latest Deadline First</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-govt me-2" onclick="applyFilters()">
+                                <i class="fas fa-search me-1"></i>Apply Filters
+                            </button>
+                            <button class="btn btn-outline-govt" onclick="clearFilters()">
+                                <i class="fas fa-times me-1"></i>Clear Filters
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <div class="table-responsive">
+                            <table class="table" id="complaintsTable">
+                                <thead>
+                                    <tr>
+                                        <th><i class="fas fa-hashtag me-1"></i>Complaint ID</th>
+                                        <th><i class="fas fa-file-alt me-1"></i>Issue Description</th>
+                                        <th><i class="fas fa-map-marker-alt me-1"></i>Location</th>
+                                        <th><i class="fas fa-info-circle me-1"></i>Status</th>
+                                        <th><i class="fas fa-clock me-1"></i>SLA Timer</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="complaintsTableBody">
+                                    <% if(locals.complaints){ %>
+                                    <% for(let i=complaints.length-1;i>=0;i--){ %>
+                                    <tr data-ward="Ward 1" data-status="Pending" data-deadline="18">
+                                        <td><strong>EL-2025-0<%=complaints[i].id%> </strong></td>
+                                        <td><%=complaints[i].description%></td>
+                                        <% if(locals.complaints[i].location){ %>
+                                        <td><%=complaints[i].location%></td>
+                                        <% }else{ %>
+                                        <td><%=complaints[i].area%></td>
+                                        <% } %>
+                                        <td><span class="status-badge status-pending">Pending</span></td>
+                                        <td><span class="sla-timer danger">36h remaining</span></td>
+                                    </tr>
+                                    <% } %>
+                                    <% } %>
+                                    <tr data-ward="Ward 1" data-status="Pending" data-deadline="18">
+                                        <td><strong>EL-2025-001</strong></td>
+                                        <td>Streetlight not working on 5th Street</td>
+                                        <td>Block A, Sector 15, Ward 1</td>
+                                        <td><span class="status-badge status-pending">Pending</span></td>
+                                        <td><span class="sla-timer danger">18h 24m remaining</span></td>
+                                    </tr>
+                                    <tr data-ward="Ward 2" data-status="In Progress" data-deadline="62">
+                                        <td><strong>EL-2025-002</strong></td>
+                                        <td>Transformer sparking near my house</td>
+                                        <td>Junction 12, Main Road, Ward 2</td>
+                                        <td><span class="status-badge status-in-progress">In Progress</span></td>
+                                        <td><span class="sla-timer safe">2d 14h remaining</span></td>
+                                    </tr>
+                                    <tr data-ward="Ward 3" data-status="Resolved" data-deadline="0">
+                                        <td><strong>EL-2025-003</strong></td>
+                                        <td>Low voltage in the neighborhood</td>
+                                        <td>Colony Park, Zone 7, Ward 3</td>
+                                        <td><span class="status-badge status-resolved">Resolved</span></td>
+                                        <td><span class="sla-timer safe">Completed</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Map Page -->
+                <div id="map" class="page">
+
+                    <div class="map-container">
+                        <div class="map-header">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                <h3><i class="fas fa-map me-2"></i>Interactive Complaint Map</h3>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <button class="btn btn-govt" onclick="showAllIssues()">
+                                        <i class="fas fa-eye me-1"></i>Show All Issues
+                                    </button>
+                                    <button class="btn btn-outline-govt" onclick="filterByPriority()">
+                                        <i class="fas fa-filter me-1"></i>Filter by Priority
+                                    </button>
+                                    <button class="btn btn-outline-govt" onclick="trackTeams()">
+                                        <i class="fas fa-users me-1"></i>Track Teams
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="map-view" style="height: 600px; position: relative;">
+                            <div id="wb-map" style="width: 100%; height: 100%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="container">
+                <p>&copy; 2025 | CITY-ZEN | Government of India | Making Cities Cleaner Together</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        // Chart.js - Monthly Trend Example
+        document.addEventListener('DOMContentLoaded', function () {
+            if (document.getElementById('complaintsTrendChart')) {
+                const ctx = document.getElementById('complaintsTrendChart').getContext('2d');
+                new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+                        datasets: [{
+                            label: 'Complaints',
+                            data: [120, 135, 150, 170, 160, 180, 210, 200, 190, 175, 160, 150],
+                            borderColor: '#1e3a8a',
+                            backgroundColor: 'rgba(30,58,138,0.1)',
+                            tension: 0.3,
+                            pointBackgroundColor: '#f59e0b',
+                            pointRadius: 5,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: { display: true },
+                            title: { display: false }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Number of Complaints' }
+                            },
+                            x: {
+                                title: { display: true, text: 'Month' }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        // Global variables
+        let currentPage = 'overview';
+        let originalTableData = [];
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('Solid Waste Management Dashboard initialized');
+
+            // Store original table data
+            const tableRows = document.querySelectorAll('#complaintsTableBody tr');
+            originalTableData = Array.from(tableRows).map(row => ({
+                element: row.cloneNode(true),
+                ward: row.dataset.ward,
+                status: row.dataset.status,
+                deadline: parseInt(row.dataset.deadline) || 0
+            }));
+
+            // Start auto-refresh every 30 seconds
+            setInterval(updateDashboard, 30000);
+
+            // Add click handlers for table rows
+            document.querySelectorAll('#complaintsTable tbody tr').forEach(row => {
+                row.addEventListener('click', function () {
+                    const complaintId = this.querySelector('td strong').textContent;
+                    showComplaintDetails(complaintId);
+                });
+            });
+        });
+
+        // Page switching functionality
+        function switchPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Remove active class from all nav tabs
+            document.querySelectorAll('.nav-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            // Show selected page
+            document.getElementById(pageName).classList.add('active');
+
+            // Add active class to clicked nav tab
+            event.target.classList.add('active');
+
+            currentPage = pageName;
+            console.log(`Switched to ${pageName} page`);
+        }
+
+        // Filter functionality
+        function applyFilters() {
+            const wardFilter = document.getElementById('wardFilter').value;
+            const statusFilter = document.getElementById('statusFilter').value;
+            const deadlineFilter = document.getElementById('deadlineFilter').value;
+
+            let filteredData = [...originalTableData];
+
+            // Apply ward filter
+            if (wardFilter) {
+                filteredData = filteredData.filter(row => row.ward === wardFilter);
+            }
+
+            // Apply status filter
+            if (statusFilter) {
+                filteredData = filteredData.filter(row => row.status === statusFilter);
+            }
+
+            // Apply deadline sorting
+            if (deadlineFilter === 'asc') {
+                filteredData.sort((a, b) => a.deadline - b.deadline);
+            } else if (deadlineFilter === 'desc') {
+                filteredData.sort((a, b) => b.deadline - a.deadline);
+            }
+
+            // Update table
+            const tableBody = document.getElementById('complaintsTableBody');
+            tableBody.innerHTML = '';
+
+            filteredData.forEach(row => {
+                const newRow = row.element.cloneNode(true);
+                newRow.addEventListener('click', function () {
+                    const complaintId = this.querySelector('td strong').textContent;
+                    showComplaintDetails(complaintId);
+                });
+                tableBody.appendChild(newRow);
+            });
+
+            console.log(`Applied filters - Ward: ${wardFilter}, Status: ${statusFilter}, Deadline: ${deadlineFilter}`);
+        }
+
+        function clearFilters() {
+            document.getElementById('wardFilter').value = '';
+            document.getElementById('statusFilter').value = '';
+            document.getElementById('deadlineFilter').value = '';
+
+            // Reset table to original data
+            const tableBody = document.getElementById('complaintsTableBody');
+            tableBody.innerHTML = '';
+
+            originalTableData.forEach(row => {
+                const newRow = row.element.cloneNode(true);
+                newRow.addEventListener('click', function () {
+                    const complaintId = this.querySelector('td strong').textContent;
+                    showComplaintDetails(complaintId);
+                });
+                tableBody.appendChild(newRow);
+            });
+
+            console.log('Filters cleared');
+        }
+
+        // Map functionality with Leaflet.js
+        let wbMap;
+        let wbMarkers = [];
+        // Sample complaint data with coordinates (replace with real data as needed)
+        const complaintLocations = [
+            {
+                id: 'El-2025-01',
+                lat: 22.6036, lon: 88.3773, // Near R.G. Kar Medical College, Kolkata
+                status: 'Pending'
+            },
+            {
+                id: 'El-2025-01',
+                lat: 22.5411, lon: 88.3965, // Topsia Industrial Area, Kolkata
+                status: 'In Progress'
+            },
+            {
+                id: 'El-2025-02',
+                lat: 22.6147, lon: 88.4246, // Dum Dum Road, Near Station
+                status: 'Pending'
+            },
+            {
+                id: 'El-2025-03',
+                lat: 22.5226, lon: 88.3832, // Kasba Connector
+                status: 'Pending'
+            },
+            {
+                id: 'El-2025-04',
+                lat: 22.4752, lon: 88.3886, // Baghajatin Railway Colony
+                status: 'In Progress'
+            },
+            {
+                id: 'El-2025-05',
+                lat: 22.4745, lon: 88.3186, // Behala Chowrasta
+                status: 'Pending'
+            },
+            {
+                id: 'El-2025-06',
+                lat: 22.6010, lon: 88.4018, // Ultadanga Canal Side
+                status: 'Pending'
+            },
+            {
+                id: 'El-2025-07',
+                lat: 22.5472, lon: 88.3777, // Tangra Meat Market
+                status: 'In Progress'
+            }
+        ];
+
+        function getMarkerColor(status) {
+            if (status === 'Pending') return 'orange';
+            if (status === 'In Progress') return 'blue';
+            if (status === 'Resolved') return 'green';
+            return 'gray';
+        }
+
+        function initWBMap() {
+            if (wbMap) return; // Prevent re-initialization
+            wbMap = L.map('wb-map').setView([22.8, 87.9], 11); // Centered on West Bengal
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 18,
+                attribution: '© OpenStreetMap contributors'
+            }).addTo(wbMap);
+            showAllIssues();
+        }
+
+        function showAllIssues() {
+            if (!wbMap) initWBMap();
+            // Remove old markers
+            wbMarkers.forEach(m => wbMap.removeLayer(m));
+            wbMarkers = [];
+            // Add all complaint pins
+            complaintLocations.forEach(c => {
+                const marker = L.circleMarker([c.lat, c.lon], {
+                    color: getMarkerColor(c.status),
+                    radius: 12,
+                    fillOpacity: 0.8
+                }).addTo(wbMap);
+                marker.bindTooltip(c.id, { permanent: false, direction: 'top' });
+                marker.on('click', function () { showPinDetails(c.id); });
+                wbMarkers.push(marker);
+            });
+            wbMap.setView([22.8, 87.9], 9);
+            console.log('Displaying all issues on map');
+        }
+
+        function filterByPriority() {
+            alert('🔍 Filtering map by priority levels (Critical, High, Medium, Low)');
+            // Example: Only show Pending complaints
+            if (!wbMap) initWBMap();
+            wbMarkers.forEach(m => wbMap.removeLayer(m));
+            wbMarkers = [];
+            complaintLocations.filter(c => c.status === 'Pending').forEach(c => {
+                const marker = L.circleMarker([c.lat, c.lon], {
+                    color: getMarkerColor(c.status),
+                    radius: 12,
+                    fillOpacity: 0.8
+                }).addTo(wbMap);
+                marker.bindTooltip(c.id, { permanent: false, direction: 'top' });
+                marker.on('click', function () { showPinDetails(c.id); });
+                wbMarkers.push(marker);
+            });
+            wbMap.setView([22.8, 87.9], 7);
+            console.log('Filtering complaints by priority');
+        }
+
+        function trackTeams() {
+            alert('👥 Tracking waste management team locations in real-time across all wards');
+            // Example: Show a dummy team marker
+            if (!wbMap) initWBMap();
+            wbMarkers.forEach(m => wbMap.removeLayer(m));
+            wbMarkers = [];
+            // Dummy team location
+            const teamMarker = L.marker([22.57, 88.36]).addTo(wbMap);
+            teamMarker.bindPopup('Waste Management Team (Live)').openPopup();
+            wbMarkers.push(teamMarker);
+            wbMap.setView([22.57, 88.36], 10);
+            console.log('Tracking waste management teams');
+        }
+
+        // Initialize map when map page is shown
+        document.addEventListener('DOMContentLoaded', function () {
+            document.querySelector('[onclick="switchPage(\'map\')"]').addEventListener('click', function () {
+                setTimeout(initWBMap, 300); // Delay to ensure DOM is ready
+            });
+        });
+
+        function showPinDetails(complaintId) {
+            const complaintDetails = {
+                'CMP-2024-001': 'Garbage collection not done for 5 days\nLocation: Block A, Sector 15, Ward 1\nStatus: Pending\nSLA: 18h 24m remaining',
+                'CMP-2024-002': 'Overflowing waste bins in residential area\nLocation: Junction 12, Main Road, Ward 2\nStatus: In Progress\nSLA: 2d 14h remaining',
+                'CMP-2024-004': 'Waste collection vehicle breakdown\nLocation: Highway 101, KM 45, Ward 4\nStatus: Pending\nSLA: 6h 12m remaining',
+                'CMP-2024-005': 'Organic waste segregation not followed\nLocation: Central Park, Gate 2, Ward 5\nStatus: In Progress\nSLA: 1d 8h remaining',
+                'CMP-2024-008': 'Biomedical waste found in open drains\nLocation: Near R.G. Kar Medical College, Ward 12\nStatus: Pending\nSLA: 3d 6h remaining',
+                'CMP-2024-009': 'Toxic chemical leakage from small factory\nLocation: Topsia Industrial Area, Ward 65\nStatus: In Progress\nSLA: 4d 2h remaining',
+                'CMP-2024-005': 'Dead animal carcass not removed causing foul smell\nLocation: Dum Dum Road, Near Station, Ward 21\nStatus: Pending\nSLA: 12h 48m remaining',
+                'CMP-2024-001': 'Waste burning reported causing air pollution\nLocation: Kasba Connector, Ward 68\nStatus: Pending\nSLA: 2d 18h remaining',
+                'CMP-2024-002': 'Sewage mixed with solid waste overflowing on road\nLocation: Baghajatin Railway Colony, Ward 99\nStatus: In Progress\nSLA: 3d 12h remaining',
+                'CMP-2024-003': 'Hazardous e-waste dumping in residential area\nLocation: Behala Chowrasta, Ward 120\nStatus: Pending\nSLA: 1d 4h remaining',
+                'CMP-2024-004': 'Large-scale plastic waste clogging canal\nLocation: Ultadanga Canal Side, Ward 29\nStatus: Pending\nSLA: 4d 22h remaining',
+                'CMP-2024-005': 'Slaughterhouse waste disposed openly\nLocation: Tangra Meat Market, Ward 58\nStatus: In Progress\nSLA: 5d 10h remaining',
+                'CMP-2024-006': 'Street vendor encroachment blocking pedestrian path\nLocation: Market Area, Ward 6\nStatus: In Progress\nSLA: 2d 12h remaining',
+                'CMP-2024-007': 'Damaged manhole cover creating safety hazard\nLocation: Industrial Road, Ward 7\nStatus: Pending\nSLA: 20h 30m remaining'
+
+            };
+
+            alert(`📋 Complaint Details:\n\n EL-2025-06 \n\n Broken Street Light Causing problem to road visibility.`);
+        }
+
+        function showComplaintDetails(complaintId) {
+            alert(`📋 Opening detailed view for ${complaintId}\n\nThis would show:\n- Full complaint description\n- Photos/videos\n- Action history\n- Assigned team details\n- Citizen feedback`);
+        }
+
+        // Auto-refresh functionality
+        function updateDashboard() {
+            console.log('Refreshing dashboard data...');
+
+            // Simulate real-time updates
+            const timers = document.querySelectorAll('.sla-timer');
+            timers.forEach(timer => {
+                if (timer.textContent.includes('remaining')) {
+                    console.log('Updating SLA timer:', timer.textContent);
+                    // In real implementation, this would update from server
+                }
+            });
+
+            // Update statistics (simulate random changes)
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach((stat, index) => {
+                const currentValue = parseInt(stat.textContent.replace(',', ''));
+                // Simulate small changes
+                const change = Math.floor(Math.random() * 5) - 2;
+                const newValue = Math.max(0, currentValue + change);
+                stat.textContent = newValue.toLocaleString();
+            });
+        }
+
+        // Utility functions
+        function exportData() {
+            alert('📊 Exporting waste management dashboard data to Excel...');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function generateReport() {
+            alert('📄 Generating comprehensive waste management report...\n\nReport will include:\n- Ward-wise statistics\n- SLA compliance rates\n- Team performance metrics\n- Citizen satisfaction scores');
+        }
+
+        // Search functionality
+        function searchComplaints(query) {
+            console.log(`Searching for: ${query}`);
+            const tableRows = document.querySelectorAll('#complaintsTableBody tr');
+
+            tableRows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                if (text.includes(query.toLowerCase())) {
+                    row.style.display = '';
+                    row.style.backgroundColor = '#fff3cd';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey) {
+                switch (e.key) {
+                    case '1':
+                        e.preventDefault();
+                        document.querySelector('[onclick="switchPage(\'overview\')"]').click();
+                        break;
+                    case '2':
+                        e.preventDefault();
+                        document.querySelector('[onclick="switchPage(\'complaints\')"]').click();
+                        break;
+                    case '3':
+                        e.preventDefault();
+                        document.querySelector('[onclick="switchPage(\'map\')"]').click();
+                        break;
+                    case 'f':
+                        e.preventDefault();
+                        document.getElementById('wardFilter').focus();
+                        break;
+                }
+            }
+        });
+
+        // Add tooltips for better UX
+        function addTooltips() {
+            const tooltips = [
+                { selector: '.stat-card', title: 'Click for detailed breakdown' },
+                { selector: '.status-badge', title: 'Click to change status' },
+                { selector: '.sla-timer', title: 'Service Level Agreement timer' },
+                { selector: '.map-pin', title: 'Click for complaint details' }
+            ];
+
+            tooltips.forEach(tooltip => {
+                document.querySelectorAll(tooltip.selector).forEach(element => {
+                    element.title = tooltip.title;
+                });
+            });
+        }
+
+        // Call addTooltips after DOM is loaded
+        document.addEventListener('DOMContentLoaded', addTooltips);
+    </script>
+</body>
+
+</html>

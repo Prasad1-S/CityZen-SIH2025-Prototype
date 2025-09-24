@@ -1,0 +1,997 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track Complaint - Road Issue Reporting</title>
+    <style>
+        * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    background: #f8fafc;
+    background-image: url('https://images.unsplash.com/photo-1564549160230-2b43d7aa41b8?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8Y291bnRyeSUyMHNpZGUlMjByb2FkJTIwbGFuZHNjYXBlfGVufDB8fDB8fHww');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    color: #334155;
+    line-height: 1.6;
+}
+
+/* Header */
+.header {
+    background: white;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 1rem 2rem;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-weight: 700;
+    font-size: 1.5rem;
+    color: #059669;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #059669, #10b981);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+}
+
+.nav-menu {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.nav-btn {
+    padding: 8px 16px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.nav-btn:hover {
+    border-color: #059669;
+    background: #f0fdf4;
+    color: #059669;
+}
+
+.nav-btn.track-btn {
+    background: #059669;
+    color: white;
+    border-color: #059669;
+}
+
+.nav-btn.track-btn:hover {
+    background: #047857;
+    border-color: #047857;
+}
+
+/* Main Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+/* Track Section */
+.track-section {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
+    margin-bottom: 2rem;
+}
+
+.track-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.track-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.track-header p {
+    color: #6b7280;
+    font-size: 1rem;
+}
+
+.track-form {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    max-width: 500px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.track-input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: monospace;
+}
+
+.track-input:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.track-btn {
+    padding: 12px 20px;
+    background: #059669;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background-color 0.2s;
+}
+
+.track-btn:hover {
+    background: #047857;
+}
+
+/* Status Display */
+.status-display {
+    display: none;
+    animation: fadeIn 0.5s ease-in;
+}
+
+.status-display.show {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.complaint-info {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+.info-value {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+.complaint-id-value {
+    color: #059669;
+    font-weight: 600;
+    font-family: monospace;
+}
+
+/* Progress Tracker */
+.progress-tracker {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+}
+
+.progress-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.progress-header h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.progress-steps {
+    position: relative;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin: 2rem 0;
+}
+
+.progress-line {
+    position: absolute;
+    top: 24px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: #e2e8f0;
+    z-index: 1;
+}
+
+.progress-line-fill {
+    height: 100%;
+    background: #059669;
+    transition: width 0.8s ease-in-out;
+    border-radius: 1px;
+}
+
+.step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    text-align: center;
+}
+
+.step-circle {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 14px;
+    margin-bottom: 0.5rem;
+    transition: all 0.3s ease;
+    background: #e2e8f0;
+    color: #9ca3af;
+    border: 3px solid #e2e8f0;
+}
+
+.step.active .step-circle {
+    background: #059669;
+    color: white;
+    border-color: #059669;
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.1);
+}
+
+.step.completed .step-circle {
+    background: #059669;
+    color: white;
+    border-color: #059669;
+}
+
+.step-title {
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+    margin-bottom: 0.25rem;
+}
+
+.step-date {
+    font-size: 12px;
+    color: #9ca3af;
+}
+
+.step.active .step-title {
+    color: #059669;
+}
+
+.step.active .step-date {
+    color: #059669;
+}
+
+.step.completed .step-title {
+    color: #059669;
+}
+
+.step.completed .step-date {
+    color: #6b7280;
+}
+
+/* Feedback Section */
+.feedback-section {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 2rem;
+}
+
+.feedback-header {
+    margin-bottom: 1.5rem;
+}
+
+.feedback-header h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 0.5rem;
+}
+
+.feedback-header p {
+    color: #6b7280;
+    font-size: 0.9rem;
+}
+
+.feedback-form {
+    display: grid;
+    gap: 1rem;
+}
+
+.rating-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.rating-label {
+    font-weight: 600;
+    color: #374151;
+    font-size: 14px;
+}
+
+.star-rating {
+    display: flex;
+    gap: 0.25rem;
+}
+
+.star {
+    font-size: 24px;
+    color: #e2e8f0;
+    cursor: pointer;
+    transition: color 0.2s;
+    user-select: none;
+}
+
+.star:hover,
+.star.active {
+    color: #fbbf24;
+}
+
+.feedback-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 100px;
+    font-family: inherit;
+}
+
+.feedback-textarea:focus {
+    outline: none;
+    border-color: #059669;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
+}
+
+.submit-feedback-btn {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #059669, #10b981);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    justify-self: start;
+}
+
+.submit-feedback-btn:hover {
+    background: linear-gradient(135deg, #047857, #059669);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-pending {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.status-acknowledged {
+    background: #e0e7ff;
+    color: #3730a3;
+}
+
+.status-in-progress {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.status-resolved {
+    background: #dcfce7;
+    color: #166534;
+}
+
+/* Footer */
+.footer {
+    background: #1f2937;
+    color: #d1d5db;
+    text-align: center;
+    padding: 2rem;
+    margin-top: 4rem;
+}
+
+/* Notification */
+.notification {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: #059669;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateX(400px);
+    transition: transform 0.3s ease;
+    z-index: 1500;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header {
+        padding: 1rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .nav-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .container {
+        padding: 1rem;
+    }
+
+    .track-section,
+    .progress-tracker,
+    .feedback-section {
+        padding: 1.5rem;
+    }
+
+    .track-form {
+        flex-direction: column;
+    }
+
+    .progress-steps {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 1.5rem;
+    }
+
+    .progress-line {
+        display: none;
+    }
+
+    .step {
+        flex-direction: row;
+        align-items: center;
+        text-align: left;
+        gap: 1rem;
+    }
+
+    .step-circle {
+        margin-bottom: 0;
+        flex-shrink: 0;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .info-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+}
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <a href="#" class="logo" onclick="goHome()">
+                <div class="logo-icon">🛣️</div>
+                <span>RoadCare</span>
+            </a>
+            <nav class="nav-menu">
+                <a href="#" class="nav-btn" onclick="goHome()">Home</a>
+                <a href="#" class="nav-btn track-btn">Track</a>
+                <a href="#" class="nav-btn">Map</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container">
+        <!-- Track Section -->
+        <div class="track-section">
+            <div class="track-header">
+                <h1>Track Your Complaint</h1>
+                <p>Enter your complaint ID to view the current status and progress</p>
+            </div>
+
+            <div class="track-form">
+                <input type="text" class="track-input" id="complaintIdInput" placeholder="Enter Complaint ID (e.g., RDC-2025-001247)" maxlength="15">
+                <button class="track-btn" onclick="trackComplaint()">Track Status</button>
+            </div>
+        </div>
+
+        <!-- Status Display -->
+        <div class="status-display" id="statusDisplay">
+            <!-- Complaint Info -->
+            <div class="complaint-info">
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Complaint ID:</span>
+                        <span class="info-value complaint-id-value" id="displayComplaintId">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Category:</span>
+                        <span class="info-value" id="displayCategory">Road Damage</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Submitted On:</span>
+                        <span class="info-value" id="displaySubmissionDate">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Current Status:</span>
+                        <span class="info-value">
+                            <span class="status-badge" id="currentStatusBadge">Pending</span>
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Location:</span>
+                        <span class="info-value" id="displayLocation">Main Street, Near City Park</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Priority:</span>
+                        <span class="info-value" id="displayPriority">Medium</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Progress Tracker -->
+            <div class="progress-tracker">
+                <div class="progress-header">
+                    <h2>Complaint Progress</h2>
+                    <p>Track the status of your complaint through these stages</p>
+                </div>
+
+                <div class="progress-steps">
+                    <div class="progress-line">
+                        <div class="progress-line-fill" id="progressLineFill"></div>
+                    </div>
+
+                    <div class="step completed" id="step1">
+                        <div class="step-circle">✓</div>
+                        <div class="step-info">
+                            <div class="step-title">Pending</div>
+                            <div class="step-date" id="pendingDate">Sep 14, 2025</div>
+                        </div>
+                    </div>
+
+                    <div class="step active" id="step2">
+                        <div class="step-circle">2</div>
+                        <div class="step-info">
+                            <div class="step-title">Acknowledged</div>
+                            <div class="step-date" id="acknowledgedDate">Sep 15, 2025</div>
+                        </div>
+                    </div>
+
+                    <div class="step" id="step3">
+                        <div class="step-circle">3</div>
+                        <div class="step-info">
+                            <div class="step-title">In Progress</div>
+                            <div class="step-date" id="progressDate">-</div>
+                        </div>
+                    </div>
+
+                    <div class="step" id="step4">
+                        <div class="step-circle">4</div>
+                        <div class="step-info">
+                            <div class="step-title">Resolved</div>
+                            <div class="step-date" id="resolvedDate">-</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feedback Section -->
+            <div class="feedback-section">
+                <div class="feedback-header">
+                    <h3>Provide Feedback</h3>
+                    <p>Help us improve our service by sharing your experience</p>
+                </div>
+
+                <form class="feedback-form" onsubmit="submitFeedback(event)">
+                    <div class="rating-group">
+                        <label class="rating-label">Rate our service:</label>
+                        <div class="star-rating" id="starRating">
+                            <span class="star" data-rating="1">★</span>
+                            <span class="star" data-rating="2">★</span>
+                            <span class="star" data-rating="3">★</span>
+                            <span class="star" data-rating="4">★</span>
+                            <span class="star" data-rating="5">★</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="rating-label" for="feedbackText">Your feedback:</label>
+                        <textarea 
+                            id="feedbackText" 
+                            class="feedback-textarea" 
+                            placeholder="Please share your experience, suggestions, or any concerns regarding the handling of your complaint..."
+                            rows="4"
+                        ></textarea>
+                    </div>
+
+                    <button type="submit" class="submit-feedback-btn">Submit Feedback</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2025 RoadCare. Making roads better for everyone.</p>
+    </footer>
+
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+
+    <script>
+        let currentRating = 0;
+        
+        // Sample complaint data
+        const complaintData = {
+            'RDC-2025-001247': {
+                id: 'RDC-2025-001247',
+                category: 'Road Damage',
+                submissionDate: 'September 14, 2025',
+                status: 'acknowledged',
+                location: 'Main Street, Near City Park',
+                priority: 'Medium',
+                dates: {
+                    pending: 'Sep 14, 2025',
+                    acknowledged: 'Sep 15, 2025',
+                    inProgress: null,
+                    resolved: null
+                }
+            },
+            'RDC-2025-001248': {
+                id: 'RDC-2025-001248',
+                category: 'Traffic Signal',
+                submissionDate: 'September 13, 2025',
+                status: 'in-progress',
+                location: 'Oak Avenue & 1st Street',
+                priority: 'High',
+                dates: {
+                    pending: 'Sep 13, 2025',
+                    acknowledged: 'Sep 13, 2025',
+                    inProgress: 'Sep 14, 2025',
+                    resolved: null
+                }
+            },
+            'RDC-2025-001249': {
+                id: 'RDC-2025-001249',
+                category: 'Pothole',
+                submissionDate: 'September 12, 2025',
+                status: 'resolved',
+                location: 'Elm Street, Block 15',
+                priority: 'High',
+                dates: {
+                    pending: 'Sep 12, 2025',
+                    acknowledged: 'Sep 12, 2025',
+                    inProgress: 'Sep 13, 2025',
+                    resolved: 'Sep 15, 2025'
+                }
+            }
+        };
+
+        // Track complaint function
+        function trackComplaint() {
+            const complaintId = document.getElementById('complaintIdInput').value.trim().toUpperCase();
+            
+            if (!complaintId) {
+                showNotification('Please enter a complaint ID', 'error');
+                return;
+            }
+
+            // Check if complaint exists
+            if (!complaintData[complaintId]) {
+                showNotification('Complaint ID not found. Please check and try again.', 'error');
+                return;
+            }
+
+            // Display complaint details
+            displayComplaintStatus(complaintData[complaintId]);
+            document.getElementById('statusDisplay').classList.add('show');
+            
+            // Scroll to status display
+            document.getElementById('statusDisplay').scrollIntoView({ 
+                behavior: 'smooth',
+                block: 'start'
+            });
+        }
+
+        // Display complaint status
+        function displayComplaintStatus(complaint) {
+            document.getElementById('displayComplaintId').textContent = complaint.id;
+            document.getElementById('displayCategory').textContent = complaint.category;
+            document.getElementById('displaySubmissionDate').textContent = complaint.submissionDate;
+            document.getElementById('displayLocation').textContent = complaint.location;
+            document.getElementById('displayPriority').textContent = complaint.priority;
+
+            // Update status badge
+            const statusBadge = document.getElementById('currentStatusBadge');
+            statusBadge.textContent = getStatusText(complaint.status);
+            statusBadge.className = `status-badge status-${complaint.status}`;
+
+            // Update progress steps
+            updateProgressSteps(complaint.status, complaint.dates);
+        }
+
+        // Get status text
+        function getStatusText(status) {
+            const statusMap = {
+                'pending': 'Pending',
+                'acknowledged': 'Acknowledged',
+                'in-progress': 'In Progress',
+                'resolved': 'Resolved'
+            };
+            return statusMap[status] || 'Unknown';
+        }
+
+        // Update progress steps
+        function updateProgressSteps(currentStatus, dates) {
+            const steps = ['pending', 'acknowledged', 'in-progress', 'resolved'];
+            const stepElements = ['step1', 'step2', 'step3', 'step4'];
+            const currentStepIndex = steps.indexOf(currentStatus);
+
+            // Update dates
+            document.getElementById('pendingDate').textContent = dates.pending || '-';
+            document.getElementById('acknowledgedDate').textContent = dates.acknowledged || '-';
+            document.getElementById('progressDate').textContent = dates.inProgress || '-';
+            document.getElementById('resolvedDate').textContent = dates.resolved || '-';
+
+            // Update step classes and progress line
+            stepElements.forEach((stepId, index) => {
+                const stepElement = document.getElementById(stepId);
+                const circle = stepElement.querySelector('.step-circle');
+                
+                stepElement.classList.remove('active', 'completed');
+                
+                if (index < currentStepIndex) {
+                    stepElement.classList.add('completed');
+                    circle.textContent = '✓';
+                } else if (index === currentStepIndex) {
+                    stepElement.classList.add('active');
+                    circle.textContent = index + 1;
+                } else {
+                    circle.textContent = index + 1;
+                }
+            });
+
+            // Update progress line
+            const progressPercentage = (currentStepIndex / (steps.length - 1)) * 100;
+            document.getElementById('progressLineFill').style.width = progressPercentage + '%';
+        }
+
+        // Star rating functionality
+        document.getElementById('starRating').addEventListener('click', function(e) {
+            if (e.target.classList.contains('star')) {
+                const rating = parseInt(e.target.dataset.rating);
+                setRating(rating);
+            }
+        });
+
+        document.getElementById('starRating').addEventListener('mouseover', function(e) {
+            if (e.target.classList.contains('star')) {
+                const rating = parseInt(e.target.dataset.rating);
+                highlightStars(rating);
+            }
+        });
+
+        document.getElementById('starRating').addEventListener('mouseleave', function() {
+            highlightStars(currentRating);
+        });
+
+        function setRating(rating) {
+            currentRating = rating;
+            highlightStars(rating);
+        }
+
+        function highlightStars(rating) {
+            const stars = document.querySelectorAll('.star');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+        }
+
+        // Submit feedback
+        async function submitFeedback(event) {
+            event.preventDefault();
+            
+            const feedbackText = document.getElementById('feedbackText').value.trim();
+            const complaintId = document.getElementById('displayComplaintId').textContent;
+            const submitBtn = document.querySelector('.submit-feedback-btn');
+            
+            if (currentRating === 0) {
+                showNotification('Please provide a rating', 'error');
+                return;
+            }
+
+            if (!feedbackText) {
+                showNotification('Please enter your feedback', 'error');
+                return;
+            }
+
+            // Show loading state
+            const originalBtnText = submitBtn.textContent;
+            submitBtn.textContent = 'Submitting...';
+            submitBtn.disabled = true;
+
+            try {
+                // Submit feedback to backend
+                const response = await fetch(`${API_BASE_URL}/api/complaints/${complaintId}/feedback`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        rating: currentRating,
+                        feedback: feedbackText,
+                        complaintId: complaintId,
+                        timestamp: new Date().toISOString()
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to submit feedback. Please try again later.');
+                }
+
+                const result = await response.json();
+                
+                showNotification('Thank you for your feedback! It has been submitted successfully.', 'success');
+                
+                // Reset form
+                document.getElementById('feedbackText').value = '';
+                setRating(0);
+                
+            } catch (error) {
+                console.error('Error submitting feedback:', error);
+                showNotification(error.message, 'error');
+                
+            } finally {
+                // Reset button state
+                submitBtn.textContent = originalBtnText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.background = type === 'error' ? '#ef4444' : '#059669';
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 4000);
+        }
+
+        // Navigation functions
+        function goHome() {
+            alert('Redirecting to home page');
+        }
+
+        // Auto-fill complaint ID if coming from confirmation page
+        document.addEventListener('DOMContentLoaded', function() {
+            const storedComplaintId = localStorage.getItem('currentComplaintId');
+            if (storedComplaintId) {
+                document.getElementById('complaintId').value = storedComplaintId;
+                trackComplaint();
+                localStorage.removeItem('currentComplaintId');
+            }
+        });
+
+        // Allow tracking with Enter key
+        document.getElementById('complaintId').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                trackComplaint();
+            }
+        });
+    </script>
+</body>
+</html>
