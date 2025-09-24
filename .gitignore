@@ -1,0 +1,5 @@
+.env
+.DS_Store
+*.log
+py.py
+updated.html
