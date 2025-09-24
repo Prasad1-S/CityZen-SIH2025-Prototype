@@ -54,9 +54,6 @@ async function getAddress(lat, lng) {
   const res = await fetch(url);
   const data = await res.json();
 
-  console.log("Full address:", data.display_name);
-  console.log("City:", data.address.city || data.address.town);
-  console.log("District/Ward:", data.address.city_district || data.address.suburb);
   return data.display_name;
 }
 
@@ -105,7 +102,6 @@ if (!lat || !lon) {
       dept = "PO";
       compNum = PotholeComplaints.length +1;
       PotholeComplaints.push(NewComplaint);
-      console.log(PotholeComplaints);
       // do something
    }else if(category=="Electricity"){
       const NewComplaint ={
@@ -123,7 +119,6 @@ if (!lat || !lon) {
       dept = "EL";
       compNum = ElectricityComplaints.length +1;
       ElectricityComplaints.push(NewComplaint);
-      console.log(ElectricityComplaints);
       // something
    }else if(category=="Waste"){
       const NewComplaint ={
@@ -141,7 +136,6 @@ if (!lat || !lon) {
       dept = "SW";
       compNum = WasteComplaints.length +1;
       WasteComplaints.push(NewComplaint);
-      console.log(WasteComplaints);
       // something
    }
    let compID = `${dept}-2025-0${compNum}`;
@@ -187,13 +181,10 @@ app.get("/track/:id", async (req, res) => {
     let idx = req.params.id;
     let dept = idx.slice(0, 2);
     idx = Number(idx.substring(9));
-    console.log(idx, dept);
     let complaintstatus;
 
     if(dept == "EL"){
       complaintstatus = ElectricityComplaints[idx-1];
-
-      console.log(complaintstatus);
     }else if(dept == "PO"){
       complaintstatus = PotholeComplaints[idx-1];
     }else if(dept == "SW"){
