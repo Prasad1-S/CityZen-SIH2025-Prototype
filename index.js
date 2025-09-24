@@ -63,13 +63,24 @@ async function getAddress(lat, lng) {
 
 
 app.post("/submit", async(req, res) => {
+   try{
   // Access description directly
   const description = req.body.description;
   const phone = req.body.reporterPhone;
   const location = req.body.location;
   const lat = req.body.latitude;
   const lon = req.body.longitude;
-  const area = await getAddress(lat, lon);
+  let area ="";
+if (!lat || !lon) {
+  area = "Unknown";
+} else {
+  try {
+    area = await getAddress(lat, lon);
+  } catch (err) {
+    console.error(err);
+    area = "Unknown";
+  }
+}
   let dept = "";
   let compNum = 0; 
   const today = new Date();
@@ -83,7 +94,7 @@ app.post("/submit", async(req, res) => {
          id: PotholeComplaints.length +1,
          description,
          phone,
-         category:"Pothole Isuue",
+         category:"Pothole Issue",
          submissionDate:formattedDate,
          location,
          area,
@@ -101,7 +112,7 @@ app.post("/submit", async(req, res) => {
          id: ElectricityComplaints.length +1,
          description,
          phone,
-         category:"Electricity Isuue",
+         category:"Electricity Issue",
          location,
          submissionDate:formattedDate,
          area,
@@ -110,7 +121,7 @@ app.post("/submit", async(req, res) => {
          status:'pending'
       }
       dept = "EL";
-      compNum = PotholeComplaints.length +1;
+      compNum = ElectricityComplaints.length +1;
       ElectricityComplaints.push(NewComplaint);
       console.log(ElectricityComplaints);
       // something
@@ -119,7 +130,7 @@ app.post("/submit", async(req, res) => {
          id: WasteComplaints.length +1,
          description,
          phone,
-         category:"Garbage Isuue",
+         category:"Garbage Issue",
          location,
          submissionDate:formattedDate,
          area,
@@ -128,7 +139,7 @@ app.post("/submit", async(req, res) => {
          status:'pending'
       }
       dept = "SW";
-      compNum = PotholeComplaints.length +1;
+      compNum = WasteComplaints.length +1;
       WasteComplaints.push(NewComplaint);
       console.log(WasteComplaints);
       // something
@@ -137,6 +148,11 @@ app.post("/submit", async(req, res) => {
   res.render("complaint",{
    complaintID:compID
   });
+}catch(err) {
+    // If any unexpected error happens
+    console.error("Submit route error:", err);
+    res.status(500).send("Internal Server Error");
+  }
 });
 
 app.get("/track-status",(req,res)=>{
